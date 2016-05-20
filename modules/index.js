@@ -1,3 +1,4 @@
+import accepts from 'accepts'
 import http from 'http'
 import tmpdir from 'os-tmpdir'
 import { parse as parseURL } from 'url'
@@ -6,6 +7,7 @@ import { stat as statFile, readFile } from 'fs'
 import { maxSatisfying as maxSatisfyingVersion } from 'semver'
 import { parsePackageURL, createPackageURL, getPackage } from './PackageUtils'
 import { generateDirectoryIndexHTML } from './IndexUtils'
+import { generateDirectoryTree } from './TreeUtils'
 import { getPackageInfo } from './RegistryUtils'
 import { createBowerPackage } from './BowerUtils'
 import {
@@ -15,6 +17,7 @@ import {
   sendRedirect,
   sendFile,
   sendText,
+  sendJSON,
   sendHTML
 } from './ResponseUtils'
 
@@ -92,6 +95,7 @@ export const createRequestHandler = (options = {}) => {
   const bowerBundle = options.bowerBundle || '/bower.zip'
   const redirectTTL = options.redirectTTL || 0
   const autoIndex = options.autoIndex !== false
+  const maximumDepth = options.maximumDepth || Number.MAX_VALUE
 
   const handleRequest = (req, res) => {
     const url = parsePackageURL(req.url)
@@ -130,13 +134,26 @@ export const createRequestHandler = (options = {}) => {
                 if (req.url[req.url.length - 1] !== '/') {
                   sendRedirect(res, req.url + '/', redirectTTL)
                 } else {
-                  generateDirectoryIndexHTML(tarballDir, filename, displayName, (error, html) => {
-                    if (html) {
-                      sendHTML(res, html, OneYear)
-                    } else {
-                      sendServerError(res, `unable to generate index page for ${displayName}${filename}`)
-                    }
-                  })
+                  const accept = accepts(req)
+                  const prefer = accept.type(['html', 'json'])
+                  
+                  if (prefer === 'json') {
+                    generateDirectoryTree(tarballDir, filename, maximumDepth, (error, json) => {
+                      if (json) {
+                        sendJSON(res, json, OneYear)
+                      } else {
+                        sendServerError(res, `unable to generate index json for ${displayName}${filename}`)
+                      }
+                    })
+                  } else {
+                    generateDirectoryIndexHTML(tarballDir, filename, displayName, (error, html) => {
+                      if (html) {
+                        sendHTML(res, html, OneYear)
+                      } else {
+                        sendServerError(res, `unable to generate index page for ${displayName}${filename}`)
+                      }
+                    })
+                  }
                 }
               } else {
                 sendNotFoundError(res, `file "${filename}" in package ${displayName}`)
