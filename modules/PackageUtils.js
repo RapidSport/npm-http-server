@@ -24,6 +24,8 @@ export const parsePackageURL = (url) => {
     return null
 
   const match = URLFormat.exec(pathname)
+  
+  console.log('parsePackageURL', pathname, match);
 
   if (match == null)
     return null

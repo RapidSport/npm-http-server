@@ -97,6 +97,9 @@ export const createRequestHandler = (options = {}) => {
 
   const handleRequest = (req, res) => {
     const url = parsePackageURL(req.url)
+    const baseUrl = req.originalUrl.slice(0, req.originalUrl.length - req.url.length)
+    
+    console.log(baseUrl, req.url, url);
 
     if (url == null)
       return sendInvalidURLError(res, req.url)
@@ -130,7 +133,7 @@ export const createRequestHandler = (options = {}) => {
               if (stats && stats.isDirectory()) {
                 // Append `/` to directory URLs
                 if (req.url[req.url.length - 1] !== '/') {
-                  sendRedirect(res, '/', redirectTTL)
+                  sendRedirect(res, baseUrl + '/', redirectTTL)
                 } else {
                   generateDirectoryTree(tarballDir, filename, maximumDepth, (error, json) => {
                     if (json) {
@@ -215,12 +218,12 @@ export const createRequestHandler = (options = {}) => {
             }
           })
         } else if (version in tags) {
-          sendRedirect(res, createPackageURL(packageName, tags[version], filename, search), redirectTTL)
+          sendRedirect(res, baseUrl + createPackageURL(packageName, tags[version], filename, search), redirectTTL)
         } else {
           const maxVersion = maxSatisfyingVersion(Object.keys(versions), version)
 
           if (maxVersion) {
-            sendRedirect(res, createPackageURL(packageName, maxVersion, filename, search), redirectTTL)
+            sendRedirect(res, baseUrl + createPackageURL(packageName, maxVersion, filename, search), redirectTTL)
           } else {
             sendNotFoundError(res, `package ${packageName}@${version}`)
           }
