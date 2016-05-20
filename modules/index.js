@@ -1,4 +1,3 @@
-import accepts from 'accepts'
 import http from 'http'
 import tmpdir from 'os-tmpdir'
 import { parse as parseURL } from 'url'
@@ -134,10 +133,7 @@ export const createRequestHandler = (options = {}) => {
                 if (url.pathname[url.pathname.length - 1] !== '/') {
                   sendRedirect(res, url.pathname + '/' + url.search, redirectTTL)
                 } else {
-                  const accept = accepts(req)
-                  const prefer = accept.type([ 'html', 'json' ])
-
-                  if (prefer === 'json') {
+                  if (url.query.hasOwnProperty('json')) {
                     generateDirectoryTree(tarballDir, filename, maximumDepth, (error, json) => {
                       if (json) {
                         sendJSON(res, json, OneYear)
