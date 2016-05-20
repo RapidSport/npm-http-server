@@ -131,8 +131,8 @@ export const createRequestHandler = (options = {}) => {
             statFile(filepath, (error, stats) => {
               if (stats && stats.isDirectory()) {
                 // Append `/` to directory URLs
-                if (req.url[req.url.length - 1] !== '/') {
-                  sendRedirect(res, req.url + '/', redirectTTL)
+                if (url.pathname[url.pathname.length - 1] !== '/') {
+                  sendRedirect(res, url.pathname + '/' + url.search, redirectTTL)
                 } else {
                   const accept = accepts(req)
                   const prefer = accept.type([ 'html', 'json' ])
