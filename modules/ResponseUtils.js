@@ -11,8 +11,8 @@ export const sendText = (res, statusCode, text) => {
 }
 
 export const sendJSON = (res, json, maxAge = 0, statusCode = 200) => {
-  const text = JSON.stringify(json, null, 2);
-  
+  const text = JSON.stringify(json, null, 2)
+
   res.writeHead(statusCode, {
     'Content-Type': 'application/json',
     'Content-Length': text.length,

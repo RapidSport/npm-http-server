@@ -13,6 +13,46 @@ const getStats = (file) =>
     })
   })
 
+const getType = stats => {
+  if (stats.isFile()) return 'file'
+  if (stats.isDirectory()) return 'directory'
+  if (stats.isBlockDevice()) return 'blockDevice'
+  if (stats.isCharacterDevice()) return 'characterDevice'
+  if (stats.isSymbolicLink()) return 'symlink'
+  if (stats.isFIFO()) return 'fifo'
+  if (stats.isSocket()) return 'socket'
+  return 'unknown'
+}
+
+const resolveDirectory = (baseDir, path, stats, maximumDepth) => {
+  const children = maximumDepth > 0
+    ? getEntries(baseDir, path, maximumDepth - 1)
+    : Promise.resolve(null)
+
+  return children
+    .then(
+      children => ({
+        path,
+        lastModified: new Date(stats.mtime).toISOString(),
+        mime: getContentType(path),
+        size: stats.size,
+        type: getType(stats),
+        children
+      })
+    )
+}
+
+const resolveEntry = (baseDir, path, stats, maximumDepth) =>
+  stats.isDirectory()
+    ? resolveDirectory(baseDir, path, stats, maximumDepth)
+    : Promise.resolve({
+      path,
+      lastModified: new Date(stats.mtime).toISOString(),
+      mime: getContentType(path),
+      size: stats.size,
+      type: getType(stats),
+    })
+
 const getEntries = (baseDir, name, maximumDepth) =>
   new Promise((resolve, reject) => {
     const dir = path.join(baseDir, name)
@@ -32,46 +72,6 @@ const getEntries = (baseDir, name, maximumDepth) =>
       }
     })
   })
-
-const getType = stats => {
-  if (stats.isFile()) return 'file';
-  if (stats.isDirectory()) return 'directory';
-  if (stats.isBlockDevice()) return 'blockDevice';
-  if (stats.isCharacterDevice()) return 'characterDevice';
-  if (stats.isSymbolicLink()) return 'symlink';
-  if (stats.isFIFO()) return 'fifo';
-  if (stats.isSocket()) return 'socket';
-  return 'unknown';
-}
-
-const resolveDirectory = (baseDir, path, stats, maximumDepth) => {
-  const children = maximumDepth > 0
-    ? getEntries(baseDir, path, maximumDepth - 1)
-    : Promise.resolve(null);
-  
-  return children
-    .then(
-      children => ({
-        path,
-        lastModified: new Date(stats.mtime).toISOString(),
-        mime: getContentType(path),
-        size: stats.size,
-        type: getType(stats),
-        children
-      })
-    )
-}
-
-const resolveEntry = (baseDir, path, stats, maximumDepth) =>
-  stats.isDirectory()
-    ? resolveDirectory(baseDir, path, stats, maximumDepth)
-    : Promise.resolve({
-        path,
-        lastModified: new Date(stats.mtime).toISOString(),
-        mime: getContentType(path),
-        size: stats.size,
-        type: getType(stats),
-      })
 
 
 export const generateDirectoryTree = (baseDir, dir, maximumDepth, callback) =>

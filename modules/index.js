@@ -135,8 +135,8 @@ export const createRequestHandler = (options = {}) => {
                   sendRedirect(res, req.url + '/', redirectTTL)
                 } else {
                   const accept = accepts(req)
-                  const prefer = accept.type(['html', 'json'])
-                  
+                  const prefer = accept.type([ 'html', 'json' ])
+
                   if (prefer === 'json') {
                     generateDirectoryTree(tarballDir, filename, maximumDepth, (error, json) => {
                       if (json) {
