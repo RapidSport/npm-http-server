@@ -50,7 +50,7 @@ const resolveEntry = (baseDir, path, stats, maximumDepth) =>
       lastModified: new Date(stats.mtime).toISOString(),
       mime: getContentType(path),
       size: stats.size,
-      type: getType(stats),
+      contentType: getType(stats),
     })
 
 const getEntries = (baseDir, name, maximumDepth) =>
