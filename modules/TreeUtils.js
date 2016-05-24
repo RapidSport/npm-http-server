@@ -25,19 +25,19 @@ const getType = stats => {
 }
 
 const resolveDirectory = (baseDir, path, stats, maximumDepth) => {
-  const children = maximumDepth > 0
+  const files = maximumDepth > 0
     ? getEntries(baseDir, path, maximumDepth - 1)
     : Promise.resolve(null)
 
-  return children
+  return files
     .then(
-      children => ({
+      files => ({
         path,
         lastModified: new Date(stats.mtime).toISOString(),
         mime: getContentType(path),
         size: stats.size,
         type: getType(stats),
-        children
+        files
       })
     )
 }
@@ -76,4 +76,4 @@ const getEntries = (baseDir, name, maximumDepth) =>
 
 export const generateDirectoryTree = (baseDir, dir, maximumDepth, callback) =>
   getEntries(baseDir, dir, maximumDepth)
-    .then(json => callback(null, json), callback)
+    .then(files => callback(null, { files }), callback)
