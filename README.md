@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/RapidSport/npm-http-server.png?label=ready&title=Ready)](https://waffle.io/RapidSport/npm-http-server)
 # npm-http-server [![Travis][build-badge]][build] [![npm package][npm-badge]][npm]
 
 [build-badge]: https://img.shields.io/travis/mjackson/npm-http-server/master.svg?style=flat-square
